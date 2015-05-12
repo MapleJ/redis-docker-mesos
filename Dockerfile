@@ -1,12 +1,19 @@
 FROM centos
+
+RUN yum install -y wget epel-release && \
+  yum install -y logrotate jemalloc && \
+  wget -O /tmp/redis.rpm ftp://195.220.108.108/linux/remi/enterprise/7/test/x86_64/redis-3.0.0-2.el7.remi.x86_64.rpm && \
+  rpm -i /tmp/redis.rpm && \
+  yum clean all
+
 ENV REDIS_DAEMONIZE="no" \
     REDIS_PIDFILE=/var/run/redis.pid \
     REDIS_PORT=6379 \
     REDIS_TCP_BACKLOG=511 \
-    REDIS_BIND=127.0.0.1 \
+    REDIS_BIND=0.0.0.0 \
     REDIS_TCP_KEEPALIVE=0 \
     REDIS_LOGLEVEL=notice \
-    REDIS_LOGFILE=/var/log/redis/redis.log \
+    REDIS_LOGFILE='""' \
     REDIS_DATABASES=16 \
     REDIS_SAVE="900 1" \
     REDIS_STOP_WRITES_ON_BGSAVE_ERROR=yes \
@@ -46,8 +53,6 @@ ENV REDIS_DAEMONIZE="no" \
     REDIS_CLIENT_OUTPUT_BUFFER_LIMIT="pubsub 32mb 8mb 60" \
     REDIS_HZ=10
 
-RUN yum install -y wget epel-release && \
-  yum install -y logrotate jemalloc && \
-  wget -O /tmp/redis.rpm ftp://195.220.108.108/linux/remi/enterprise/7/test/x86_64/redis-3.0.0-2.el7.remi.x86_64.rpm && \
-  rpm -i /tmp/redis.rpm && \
-  yum clean all
+EXPOSE $REDIS_PORT
+ADD srv/run.sh /srv/run.sh
+CMD /srv/run.sh
